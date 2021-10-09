@@ -1,0 +1,19 @@
+---
+title: "p8105_hw2_jl6048"
+output: github_document
+author: Jinghan Liu
+---
+
+```{r}
+library(tidyverse)
+library(readxl)
+```
+
+## Problem 1
+
+```{r message=FALSE}
+Trash_df = read_excel("Trash-Wheel-Collection-Totals-8-6-19.xlsx", ,range ="A2:N408")
+Trash_df
+```
+
+
