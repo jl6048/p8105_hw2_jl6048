@@ -1,0 +1,188 @@
+---
+title: "p8105_hw2_jl6048"
+output: github_document
+author: Jinghan Liu
+---
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(lubridate)
+```
+
+## Problem 1a
+
+#Read and clean the Mr. Trash Wheel sheet
+```{r message=FALSE}
+Trash_df = 
+  read_excel("Trash-Wheel-Collection-Totals-7-2020-2.xlsx", sheet = "Mr. Trash Wheel" ,range ="A2:N535") %>%
+  janitor::clean_names() %>%
+  drop_na(dumpster,month) %>%
+  mutate(sports_balls = round(sports_balls)) 
+Trash_df
+```
+
+
+## Problem 1b
+
+#Read and clean precipitation data for 2018 and 2019
+```{r message=FALSE}
+data2019_df = 
+  read_excel("Trash-Wheel-Collection-Totals-7-2020-2.xlsx", sheet = "2019 Precipitation" ,range ="A2:B14") %>%
+  janitor::clean_names() %>%
+  mutate(year = 2019)
+data2019_df
+
+data2018_df = 
+  read_excel("Trash-Wheel-Collection-Totals-7-2020-2.xlsx", sheet = "2018 Precipitation" ,range ="A2:B14") %>%
+  janitor::clean_names() %>%
+  mutate(year = 2018) 
+data2018_df
+```
+
+#combine precipitation datasets
+```{r message=FALSE}
+data_df =
+  bind_rows(data2019_df, data2018_df)%>%
+  mutate(month = month.name[month])
+data_df
+```
+
+#description
+
+The number of obervations in Trash wheel dateset is `r nrow(Trash_df)` obsevations and the varialbles are `r ncol(Trash_df)` variables. 
+The key variables for trash measurements are `r Trash_df %>% select(weight_tons)%>% names()`
+
+The number of obervations in combined precipitation dateset is `r nrow(data_df)` obsevations and the varialbles are `r ncol(data_df)` variables. 
+The total precipitation in 2018 was`r sum(pull(data2018_df,total))` inches
+The median number of sports balls in a dumpster in 2019 was`r Trash_df %>% filter(year == 2019) %>% pull(sports_balls)  %>% median()`
+
+
+
+## Problem 2
+
+#pols dataset read and tidy
+```{r message=FALSE}
+pols_df = 
+  read_csv("data/pols-month.csv") %>%
+  janitor::clean_names() %>%
+  separate(mon, into = c("year", "month", "day"), convert = TRUE) %>%
+  mutate(month = month.abb[month])
+pols_df
+
+
+pols_tidy =
+  pols_df %>%
+  pivot_longer(
+    c(prez_gop, prez_dem),
+    names_to = "president",
+    names_prefix = "prez_",
+    values_to = "dbi") %>%
+    select(-day) %>%
+  filter(dbi != 0) %>%
+    select(-dbi)
+pols_tidy
+
+```
+#snp dataset read and tidy
+```{r message=FALSE}
+snp_df = 
+  read_csv("data/snp.csv") %>%
+  janitor::clean_names() %>%
+  separate(date, into = c("month","day","year"), convert = TRUE)%>%
+   mutate(
+     year = ifelse(year<= 15, year + 2000, year + 1900),
+     month = month.abb[month]) %>%
+  select(year, month, close)
+snp_df
+```
+#unemployment dataset read and tidy
+```{r message=FALSE}
+une_df = 
+  read_csv("data/unemployment.csv") %>%
+  pivot_longer(
+    Jan:Dec,
+    names_to = "month",
+    values_to = "unemployment")%>%
+  janitor::clean_names() 
+une_df
+ 
+```
+#merge three datasets
+```{r message=FALSE}
+pols_snp_df =
+  full_join(pols_tidy, snp_df)
+all_df =
+  full_join(pols_snp_df, une_df)
+all_df
+```
+
+#description
+
+The pols-months dataset have 822 observations and 9 variables. This data contains 1947-2015 years national politicians and in the column of President, "dem" means democratic and "gop" means republican.
+
+The snp dataset have 787 observations and 3 variables. This data contains the closing values of the standard & poor's stock index in 1950-2015. The largest closing value was`r max(pull(snp_df,close))` and the smallest closing value was `r min(pull(snp_df,close))`
+
+The unemployment dataset have 816 observations and 3 variables. This dataset contains unemplyment percentage from `r min(pull(une_df, year))` to `r max(pull(une_df, year))`.
+
+
+
+## Problem 3
+
+#remove duplicate rows
+```{r}
+pbn_df = 
+  read_csv("Popular_Baby_Names.csv") %>%
+  janitor::clean_names() %>%
+  mutate( gender = str_to_lower(gender), 
+          childs_first_name = str_to_lower(childs_first_name),
+          ethnicity = str_to_lower(ethnicity),  
+          ethnicity = recode(ethnicity, "white non hisp" = "white non hispanic", "asian and paci" = "asian and pacific islander", "black non hisp" = "black non hispanic"))%>%
+  distinct()
+pbn_df
+```
+
+#Olivia's table
+```{r message=FALSE}
+olivia_df = 
+  filter(pbn_df,
+    gender == "female",
+    childs_first_name == "olivia") %>%
+  select(year_of_birth, ethnicity, rank) %>%
+  pivot_wider(
+    names_from = "year_of_birth",
+    values_from = "rank") %>%
+  knitr::kable()
+olivia_df
+```
+
+#males table
+```{r message=FALSE}
+male_df = 
+  filter(pbn_df,
+    gender == "male",
+    rank == 1) %>%
+  select(year_of_birth, ethnicity, childs_first_name) %>%
+  pivot_wider(
+    names_from = "year_of_birth",
+    values_from = "childs_first_name") %>%
+  knitr::kable()
+male_df
+```
+
+# scatter plot 
+```{r message=FALSE}
+male_white_2016 =
+  filter(pbn_df,
+         gender == "male",
+         year_of_birth == "2016",
+         ethnicity == "white non hispanic")%>%
+  ggplot(aes(x = rank, y = count)) +
+  geom_point() + 
+  geom_text(aes(label = childs_first_name)) +
+  labs(title = "white non-hispanic male children name rank in 2016",
+       x = "Rank of name",
+       y = "number of name")
+male_white_2016
+```
+
