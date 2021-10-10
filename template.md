@@ -138,13 +138,18 @@ data_df
 
 \#description
 
-Write a paragraph about these data; you are encouraged to use inline R.
-Be sure to note the number of observations in both resulting datasets,
-and give examples of key variables. For available data, what was the
-total precipitation in 2018? What was the median number of sports balls
-in a dumpster in 2019?
+The number of obervations in Trash wheel dateset is 453 obsevations and
+the varialbles are 14 variables. The key variables for trash
+measurements are weight\_tons
+
+The number of obervations in combined precipitation dateset is 24
+obsevations and the varialbles are 3 variables. The total precipitation
+in 2018 was70.33 inches The median number of sports balls in a dumpster
+in 2019 was9
 
 \#\#Problem 2
+
+\#pols dataset read and tidy
 
 ``` r
 pols_df = 
@@ -199,6 +204,8 @@ pols_tidy
     ## 10  1947 Oct        23      51     253      23      45     198 dem      
     ## # ... with 812 more rows
 
+\#snp dataset read and tidy
+
 ``` r
 snp_df = 
   read_csv("data/snp.csv") %>%
@@ -226,6 +233,8 @@ snp_df
     ## 10  2014 Oct   2018.
     ## # ... with 777 more rows
 
+\#unemployment dataset read and tidy
+
 ``` r
 une_df = 
   read_csv("data/unemployment.csv") %>%
@@ -252,6 +261,8 @@ une_df
     ## 10  1948 Oct            3.7
     ## # ... with 806 more rows
 
+\#merge three datasets
+
 ``` r
 pols_snp_df =
   full_join(pols_tidy, snp_df)
@@ -275,7 +286,23 @@ all_df
     ## 10  1947 Oct        23      51     253      23      45     198 dem          NA
     ## # ... with 818 more rows, and 1 more variable: unemployment <dbl>
 
+\#description
+
+The pols-months dataset have 822 observations and 9 variables. This data
+contains 1947-2015 years national politicians and in the column of
+President, “dem” means democratic and “gop” means republican.
+
+The snp dataset have 787 observations and 3 variables. This data
+contains the closing values of the standard & poor’s stock index in
+1950-2015. The largest closing value was2107.389893 and the smallest
+closing value was 17.049999
+
+The unemployment dataset have 816 observations and 3 variables. This
+dataset contains unemplyment percentage from 1948 to 2015.
+
 \#\#Problem 3
+
+\#remove duplicate rows
 
 ``` r
 pbn_df = 
@@ -318,6 +345,8 @@ pbn_df
     ## 10          2016 female asian and pacific islander hannah               56     8
     ## # ... with 12,171 more rows
 
+\#Olivia’s table
+
 ``` r
 olivia_df = 
   filter(pbn_df,
@@ -338,6 +367,8 @@ olivia_df
 | hispanic                   |   13 |   16 |   16 |   22 |   22 |   18 |
 | white non hispanic         |    1 |    1 |    1 |    1 |    4 |    2 |
 
+\#males table
+
 ``` r
 male_df = 
   filter(pbn_df,
@@ -357,6 +388,8 @@ male_df
 | black non hispanic         | noah   | noah   | ethan  | ethan  | jayden | jayden  |
 | hispanic                   | liam   | liam   | liam   | jayden | jayden | jayden  |
 | white non hispanic         | joseph | david  | joseph | david  | joseph | michael |
+
+# scatter plot
 
 ``` r
 male_white_2016 =
